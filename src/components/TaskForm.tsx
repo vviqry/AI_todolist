@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Sparkles, Loader2 } from "lucide-react";
 import { useTaskStore } from "@/store/taskStore";
 import { useAuthStore } from "@/store/authStore";
 
@@ -15,6 +15,7 @@ export default function TaskForm() {
   const [priority, setPriority] = useState("low");
   const [subtasks, setSubtasks] = useState<SubtaskInput[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
 
   const addTask = useTaskStore((s) => s.addTask);
   const user = useAuthStore((s) => s.user);
@@ -29,6 +30,41 @@ export default function TaskForm() {
 
   const handleSubtaskChange = (id: string, text: string) => {
     setSubtasks(subtasks.map((st) => (st.id === id ? { ...st, text } : st)));
+  };
+
+  const handleGenerateAI = async () => {
+    if (!taskText.trim()) return;
+    
+    setGeneratingAI(true);
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ task: taskText.trim() }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Gagal memanggil AI');
+      }
+
+      const data = await response.json();
+      if (data.subtasks && Array.isArray(data.subtasks)) {
+        const newSubtasks = data.subtasks.map((text: string) => ({
+          id: Math.random().toString(36).substr(2, 9),
+          text: text,
+        }));
+        
+        // Append new subtasks to existing ones
+        setSubtasks((prev) => [...prev, ...newSubtasks]);
+      }
+    } catch (error) {
+      console.error("AI Error:", error);
+      alert("Gagal membuat langkah-langkah dengan AI. Silakan coba lagi nanti.");
+    } finally {
+      setGeneratingAI(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,7 +95,7 @@ export default function TaskForm() {
     <section className="input-section">
       <h2 className="section-title">Tambah Tugas Baru</h2>
       <form onSubmit={handleSubmit} className="task-form">
-        <div className="form-group">
+        <div className="form-group" style={{ position: 'relative' }}>
           <textarea
             className="task-input"
             placeholder="Tuliskan tugas Anda di sini..."
@@ -67,7 +103,24 @@ export default function TaskForm() {
             value={taskText}
             onChange={(e) => setTaskText(e.target.value)}
             required
+            style={{ paddingBottom: '32px' }}
           ></textarea>
+          
+          {/* AI Magic Button */}
+          <button
+            type="button"
+            className="ai-generate-btn"
+            onClick={handleGenerateAI}
+            disabled={generatingAI || !taskText.trim()}
+            title="Generate langkah dengan AI"
+          >
+            {generatingAI ? (
+              <Loader2 size={16} className="ai-spin" />
+            ) : (
+              <Sparkles size={16} />
+            )}
+            <span className="sr-only">Generate AI</span>
+          </button>
         </div>
 
         {/* Sub-Task Builder */}
@@ -82,7 +135,6 @@ export default function TaskForm() {
                   placeholder="Sub tugas..."
                   value={st.text}
                   onChange={(e) => handleSubtaskChange(st.id, e.target.value)}
-                  autoFocus
                 />
                 <button
                   type="button"
