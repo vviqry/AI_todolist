@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { LogOut } from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { LogOut, Menu, X } from "lucide-react";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
@@ -12,6 +12,8 @@ interface HeaderProps {
 
 export default function Header({ userName, userEmail }: HeaderProps) {
   const [dateTime, setDateTime] = useState({ day: "", date: "" });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -33,11 +35,20 @@ export default function Header({ userName, userEmail }: HeaderProps) {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleLogout = async () => {
     await signOut(auth);
   };
 
-  // Get initials for avatar
   const displayName = userName || userEmail || "User";
   const initials = displayName
     .split(" ")
@@ -59,7 +70,9 @@ export default function Header({ userName, userEmail }: HeaderProps) {
           <p className="user-role">{userEmail || ""}</p>
         </div>
       </div>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
+      
+      {/* Desktop view controls */}
+      <div className="header-controls-desktop">
         <div className="time-section">
           <p className="current-day">{dateTime.day}</p>
           <p className="current-date">{dateTime.date}</p>
@@ -72,6 +85,32 @@ export default function Header({ userName, userEmail }: HeaderProps) {
         >
           <LogOut size={18} />
         </button>
+      </div>
+
+      {/* Mobile view hamburger */}
+      <div className="header-controls-mobile" ref={menuRef}>
+        <button 
+          className="hamburger-btn"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+        
+        {menuOpen && (
+          <div className="mobile-dropdown">
+            <div className="dropdown-time">
+              <p className="current-day">{dateTime.day}</p>
+              <p className="current-date">{dateTime.date}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="dropdown-logout-btn"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

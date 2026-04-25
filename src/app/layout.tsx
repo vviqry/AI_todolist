@@ -10,7 +10,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "To-Do List App",
   description: "Aplikasi To-Do List Mobile - Kelola tugas harian Anda dengan mudah",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
 };
+
 
 export default function RootLayout({
   children,

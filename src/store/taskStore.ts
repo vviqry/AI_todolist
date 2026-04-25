@@ -67,21 +67,28 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     get().cleanup();
 
     const q = query(getTasksRef(userId), orderBy("createdAt", "desc"));
-    const unsub = onSnapshot(q, (snapshot) => {
-      const tasks: Task[] = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          text: data.text,
-          priority: data.priority,
-          isCompleted: data.isCompleted,
-          createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : data.createdAt,
-          completedAt: data.completedAt instanceof Timestamp ? data.completedAt.toMillis() : data.completedAt,
-          subtasks: data.subtasks || [],
-        };
-      });
-      set({ tasks, loading: false });
-    });
+    const unsub = onSnapshot(
+      q,
+      (snapshot) => {
+        const tasks: Task[] = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            text: data.text,
+            priority: data.priority,
+            isCompleted: data.isCompleted,
+            createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toMillis() : data.createdAt,
+            completedAt: data.completedAt instanceof Timestamp ? data.completedAt.toMillis() : data.completedAt,
+            subtasks: data.subtasks || [],
+          };
+        });
+        set({ tasks, loading: false });
+      },
+      (error) => {
+        console.error("Error fetching tasks:", error);
+        set({ loading: false });
+      }
+    );
 
     set({ unsubscribe: unsub });
   },
