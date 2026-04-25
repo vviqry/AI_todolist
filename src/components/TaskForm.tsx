@@ -46,7 +46,8 @@ export default function TaskForm() {
       });
 
       if (!response.ok) {
-        throw new Error('Gagal memanggil AI');
+        const errData = await response.json().catch(() => null);
+        throw new Error(errData?.error || `HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
@@ -58,10 +59,12 @@ export default function TaskForm() {
         
         // Append new subtasks to existing ones
         setSubtasks((prev) => [...prev, ...newSubtasks]);
+      } else if (data.error) {
+        throw new Error(data.error);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("AI Error:", error);
-      alert("Gagal membuat langkah-langkah dengan AI. Silakan coba lagi nanti.");
+      alert(`Gagal AI: ${error.message || 'Silakan coba lagi nanti.'}`);
     } finally {
       setGeneratingAI(false);
     }
