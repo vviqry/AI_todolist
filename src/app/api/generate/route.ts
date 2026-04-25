@@ -19,7 +19,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const prompt = `You are a productivity assistant. Given the following main task, generate 3 to 5 short, actionable, and specific subtasks to accomplish it. The subtasks should be in Indonesian.
+    const prompt = `You are a productivity assistant. Given the following main task, generate up to 10 short, actionable, and specific subtasks to accomplish it. Try to provide around 8-10 detailed steps if the task is complex enough. The subtasks should be in Indonesian.
     
 IMPORTANT: Return ONLY a valid JSON array of strings. Do not include markdown formatting, backticks, or any conversational text.
 
