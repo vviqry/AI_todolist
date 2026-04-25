@@ -1,0 +1,27 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
+export const metadata: Metadata = {
+  title: "To-Do List App",
+  description: "Aplikasi To-Do List Mobile - Kelola tugas harian Anda dengan mudah",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="id" className={`${inter.variable} antialiased`} suppressHydrationWarning>
+      <body className="bg-[#0f0f1a] text-white min-h-screen" suppressHydrationWarning>
+        {children}
+      </body>
+    </html>
+  );
+}
