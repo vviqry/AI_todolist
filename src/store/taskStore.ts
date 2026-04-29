@@ -42,6 +42,8 @@ interface TaskState {
   addTask: (userId: string, text: string, priority: string, subtasks: { text: string }[]) => Promise<void>;
   toggleComplete: (userId: string, task: Task) => Promise<void>;
   toggleSubtask: (userId: string, task: Task, subtaskId: string) => Promise<void>;
+  updateTaskText: (userId: string, taskId: string, newText: string) => Promise<void>;
+  updateSubtaskText: (userId: string, task: Task, subtaskId: string, newText: string) => Promise<void>;
   deleteTask: (userId: string, taskId: string) => Promise<void>;
   deleteAll: (userId: string) => Promise<void>;
 }
@@ -159,6 +161,19 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     } else {
       await updateDoc(ref, { subtasks: updatedSubtasks });
     }
+  },
+
+  updateTaskText: async (userId, taskId, newText) => {
+    const ref = doc(db, "users", userId, "tasks", taskId);
+    await updateDoc(ref, { text: newText });
+  },
+
+  updateSubtaskText: async (userId, task, subtaskId, newText) => {
+    const ref = doc(db, "users", userId, "tasks", task.id);
+    const updatedSubtasks = task.subtasks.map((st) =>
+      st.id === subtaskId ? { ...st, text: newText } : st
+    );
+    await updateDoc(ref, { subtasks: updatedSubtasks });
   },
 
   deleteTask: async (userId, taskId) => {

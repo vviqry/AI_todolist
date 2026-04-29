@@ -903,6 +903,149 @@
   color: var(--text-muted);
 }
 
+/* ===== Inline Edit ===== */
+
+/* Row container for task text + edit icon */
+.task-text-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  position: relative;
+}
+
+.task-text-row .edit-inline-btn {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.task-text-row:hover .edit-inline-btn,
+.subtask-text-row:hover .edit-inline-btn {
+  opacity: 1;
+}
+
+/* Row container for subtask text + edit icon */
+.subtask-text-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Pencil button */
+.edit-inline-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+  padding: 0;
+}
+
+.edit-inline-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--accent-primary);
+}
+
+.edit-inline-btn-sm {
+  width: 18px;
+  height: 18px;
+}
+
+/* Inline edit wrapper */
+.inline-edit-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.inline-edit-subtask {
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Textarea (task title) */
+.inline-edit-input {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent-primary);
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: none;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  transition: var(--transition-fast);
+  line-height: 1.5;
+}
+
+/* Input (subtask) */
+.inline-edit-input-sm {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--accent-primary);
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.75rem;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* Confirm / Cancel buttons row */
+.inline-edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.inline-confirm-btn,
+.inline-cancel-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+}
+
+.inline-confirm-btn {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--success);
+}
+
+.inline-confirm-btn:hover {
+  background: rgba(34, 197, 94, 0.35);
+}
+
+.inline-cancel-btn {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+}
+
+.inline-cancel-btn:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
 /* ===== Footer ===== */
 .footer {
   padding: var(--spacing-lg);

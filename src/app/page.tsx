@@ -11,7 +11,7 @@ import { Trash2 } from "lucide-react";
 
 function TodoApp() {
   const user = useAuthStore((s) => s.user);
-  const { tasks, loading, subscribeTasks, cleanup, toggleComplete, toggleSubtask, deleteTask, deleteAll } =
+  const { tasks, loading, subscribeTasks, cleanup, toggleComplete, toggleSubtask, updateTaskText, updateSubtaskText, deleteTask, deleteAll } =
     useTaskStore();
 
   useEffect(() => {
@@ -48,6 +48,8 @@ function TodoApp() {
             onToggleComplete={(task) => user && toggleComplete(user.uid, task)}
             onToggleSubtask={(task, subtaskId) => user && toggleSubtask(user.uid, task, subtaskId)}
             onDelete={(taskId) => user && deleteTask(user.uid, taskId)}
+            onEditTask={(taskId, newText) => user && updateTaskText(user.uid, taskId, newText)}
+            onEditSubtask={(task, subtaskId, newText) => user && updateSubtaskText(user.uid, task, subtaskId, newText)}
           />
         )}
       </main>

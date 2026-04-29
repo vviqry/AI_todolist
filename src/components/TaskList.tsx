@@ -10,9 +10,11 @@ interface TaskListProps {
   onToggleComplete: (task: Task) => void;
   onToggleSubtask: (task: Task, subtaskId: string) => void;
   onDelete: (taskId: string) => void;
+  onEditTask: (taskId: string, newText: string) => void;
+  onEditSubtask: (task: Task, subtaskId: string, newText: string) => void;
 }
 
-export default function TaskList({ tasks, onToggleComplete, onToggleSubtask, onDelete }: TaskListProps) {
+export default function TaskList({ tasks, onToggleComplete, onToggleSubtask, onDelete, onEditTask, onEditSubtask }: TaskListProps) {
   const todoTasks = tasks.filter((t) => !t.isCompleted);
   const doneTasks = tasks.filter((t) => t.isCompleted);
 
@@ -42,6 +44,8 @@ export default function TaskList({ tasks, onToggleComplete, onToggleSubtask, onD
                 onToggleComplete={onToggleComplete}
                 onToggleSubtask={onToggleSubtask}
                 onDelete={onDelete}
+                onEditTask={onEditTask}
+                onEditSubtask={onEditSubtask}
               />
             ))
           )}
@@ -72,6 +76,8 @@ export default function TaskList({ tasks, onToggleComplete, onToggleSubtask, onD
                 onToggleComplete={onToggleComplete}
                 onToggleSubtask={onToggleSubtask}
                 onDelete={onDelete}
+                onEditTask={onEditTask}
+                onEditSubtask={onEditSubtask}
               />
             ))
           )}

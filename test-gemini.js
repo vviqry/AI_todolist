@@ -1,4 +1,10 @@
-const apiKey = 'AIzaSyC8zsoLo5O-6S30_C2Qj9BJdrXunmwUT-k';
+const apiKey = process.env.GEMINI_API_KEY;
+
+if (!apiKey) {
+  console.error("Please set GEMINI_API_KEY environment variable. You can run this script with: node --env-file=.env.local test-gemini.js");
+  process.exit(1);
+}
+
 fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`)
 .then(r => r.json())
 .then(data => {
