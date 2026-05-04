@@ -19,7 +19,7 @@
   --priority-low: #22c55e;
   --priority-medium: #f59e0b;
   --priority-high: #ef4444;
-  --overdue: #dc2626;
+
 
   --danger: #ef4444;
   --success: #22c55e;
@@ -582,24 +582,7 @@
   color: var(--text-muted);
 }
 
-.task-item.overdue {
-  border-color: rgba(220, 38, 38, 0.5);
-  background: rgba(220, 38, 38, 0.1);
-}
 
-.task-item.overdue::before {
-  content: "⚠️ OVERDUE";
-  position: absolute;
-  top: 4px;
-  right: var(--spacing-md);
-  font-size: 0.625rem;
-  font-weight: 600;
-  color: var(--overdue);
-  background: var(--bg-secondary);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  z-index: 2;
-}
 
 /* Custom Checkbox */
 .checkbox-wrapper {
@@ -913,7 +896,8 @@
   position: relative;
 }
 
-.task-text-row .edit-inline-btn {
+.task-text-row .edit-inline-btn,
+.subtask-text-row .edit-inline-btn {
   opacity: 0;
   transition: opacity var(--transition-fast);
 }

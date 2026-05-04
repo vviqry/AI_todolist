@@ -94,8 +94,7 @@ export default function TaskItem({
   const isCompleted = task.isCompleted;
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
   const progress = getProgress(task);
-  const overdueThreshold = 24 * 60 * 60 * 1000;
-  const isOverdue = !isCompleted && Date.now() - task.createdAt > overdueThreshold;
+
 
   // Progress bar color
   let progressColorClass = "progress-active";
@@ -113,7 +112,7 @@ export default function TaskItem({
 
   return (
     <div
-      className={`task-item ${isCompleted ? "completed" : ""} ${isOverdue ? "overdue" : ""} ${hasSubtasks ? "has-subtasks" : ""} ${removing ? "removing" : ""}`}
+      className={`task-item ${isCompleted ? "completed" : ""} ${hasSubtasks ? "has-subtasks" : ""} ${removing ? "removing" : ""}`}
       style={{ animation: removing ? "fadeOut 0.3s ease forwards" : undefined }}
     >
       <div className="task-item-header">
