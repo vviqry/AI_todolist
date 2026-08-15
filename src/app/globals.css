@@ -395,6 +395,32 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
+}
+
+.subtask-inputs::-webkit-scrollbar {
+  width: 4px;
+}
+
+.subtask-inputs::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.subtask-inputs::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.35);
+  border-radius: 4px;
+}
+
+.subtask-inputs::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.6);
 }
 
 .subtask-input-row {
@@ -799,10 +825,14 @@
   flex-direction: column;
   gap: var(--spacing-xs);
   padding-left: var(--spacing-sm);
+  padding-right: 6px;
   border-left: 2px solid rgba(99, 102, 241, 0.2);
   margin-left: var(--spacing-sm);
-  overflow: hidden;
-  max-height: 500px;
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   opacity: 1;
   transition:
     max-height 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
@@ -810,13 +840,36 @@
     padding 0.25s ease;
   padding-top: var(--spacing-xs);
   padding-bottom: var(--spacing-xs);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.35) transparent;
 }
 
 .subtask-list.collapsed {
-  max-height: 0;
+  max-height: 0 !important;
   opacity: 0;
   padding-top: 0;
   padding-bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Custom Scrollbar for Subtask List */
+.subtask-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.subtask-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.subtask-list::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.35);
+  border-radius: 4px;
+}
+
+.subtask-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.6);
 }
 
 .subtask-item {
@@ -826,6 +879,8 @@
   padding: var(--spacing-xs) var(--spacing-sm);
   border-radius: 6px;
   transition: var(--transition-fast);
+  min-width: 0;
+  width: 100%;
 }
 
 .subtask-item:hover {
@@ -1165,6 +1220,16 @@
   .priority-btn {
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: 0.688rem;
+  }
+}
+
+/* Mobile Subtask List Constraint */
+@media (max-width: 640px) {
+  .subtask-list {
+    max-height: 190px;
+    padding-left: 6px;
+    padding-right: 4px;
+    margin-left: 4px;
   }
 }
 
