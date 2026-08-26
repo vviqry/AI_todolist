@@ -11,8 +11,20 @@ import { Trash2 } from "lucide-react";
 
 function TodoApp() {
   const user = useAuthStore((s) => s.user);
-  const { tasks, loading, subscribeTasks, cleanup, toggleComplete, toggleSubtask, updateTaskText, updateSubtaskText, deleteTask, deleteAll } =
-    useTaskStore();
+  const {
+    tasks,
+    loading,
+    subscribeTasks,
+    cleanup,
+    toggleComplete,
+    toggleSubtask,
+    toggleRecurringInstance,
+    updateTaskText,
+    updateSubtaskText,
+    updateRecurringConfig,
+    deleteTask,
+    deleteAll,
+  } = useTaskStore();
 
   useEffect(() => {
     if (user) {
@@ -47,9 +59,17 @@ function TodoApp() {
             tasks={tasks}
             onToggleComplete={(task) => user && toggleComplete(user.uid, task)}
             onToggleSubtask={(task, subtaskId) => user && toggleSubtask(user.uid, task, subtaskId)}
+            onToggleRecurringInstance={(task, periodKey, index) =>
+              user && toggleRecurringInstance(user.uid, task, periodKey, index)
+            }
             onDelete={(taskId) => user && deleteTask(user.uid, taskId)}
             onEditTask={(taskId, newText) => user && updateTaskText(user.uid, taskId, newText)}
-            onEditSubtask={(task, subtaskId, newText) => user && updateSubtaskText(user.uid, task, subtaskId, newText)}
+            onEditSubtask={(task, subtaskId, newText) =>
+              user && updateSubtaskText(user.uid, task, subtaskId, newText)
+            }
+            onUpdateRecurringConfig={(taskId, config) =>
+              user && updateRecurringConfig(user.uid, taskId, config)
+            }
           />
         )}
       </main>

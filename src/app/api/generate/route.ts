@@ -86,7 +86,7 @@ Main task: "${task}"`;
         throw new Error('Not an array');
       }
       return NextResponse.json({ subtasks });
-    } catch (parseError) {
+    } catch {
       console.error('Failed to parse JSON:', text);
       return NextResponse.json(
         { error: 'Invalid format from AI' },

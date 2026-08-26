@@ -1,6 +1,6 @@
-// Fix: Make auth listener client-side only
 import { create } from "zustand";
-import { User } from "firebase/auth";
+import { User, onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 interface AuthState {
   user: User | null;
@@ -18,12 +18,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   init: () => {
     if (get().initialized) return;
     set({ initialized: true });
-    // Dynamic import to avoid SSR issues
-    import("@/lib/firebase").then(({ auth }) => {
-      const { onAuthStateChanged } = require("firebase/auth");
-      onAuthStateChanged(auth, (user: User | null) => {
-        set({ user, loading: false });
-      });
+    onAuthStateChanged(auth, (user: User | null) => {
+      set({ user, loading: false });
     });
   },
 }));
