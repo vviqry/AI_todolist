@@ -12,17 +12,24 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "To-Do List App",
-  description: "Aplikasi To-Do List Mobile - Kelola tugas harian Anda dengan mudah",
-  manifest: "/manifest.json",
+  title: "Fikri To-Do",
+  description: "Aplikasi To-Do List & Target Harian Modern - Kelola tugas dan kebiasaan harian Anda dengan mudah",
+  manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon.png",
-    apple: "/icon.png",
+    icon: [
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/icon.png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "To-Do App",
+    statusBarStyle: "black-translucent",
+    title: "Fikri To-Do",
   },
 };
 

@@ -196,8 +196,101 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 250ms ease;
+}
+
+.input-section.form-expanded {
+  padding: var(--spacing-lg);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.1);
+}
+
+.input-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.section-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.form-toggle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--accent-gradient);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+  transition: transform 250ms ease, box-shadow 250ms ease, background 250ms ease;
+}
+
+.form-toggle-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.5);
+}
+
+.form-toggle-btn.open {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.form-toggle-icon {
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-toggle-icon.rotated {
+  transform: rotate(45deg);
+}
+
+.form-toggle-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all var(--transition-fast);
+}
+
+.input-section-header:hover .form-toggle-badge {
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Form Slide-down & Fade Collapsible Animation */
+.form-collapsible-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 250ms cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 200ms ease,
+              margin-top 250ms ease;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+.form-collapsible-wrapper.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: var(--spacing-lg);
+}
+
+.form-collapsible-inner {
+  min-height: 0;
 }
 
 .task-form {
@@ -528,6 +621,75 @@
   align-items: center;
 }
 
+/* Collapsible Selesai Section */
+.done-toggle-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+  font-family: inherit;
+  transition: opacity var(--transition-fast);
+}
+
+.done-toggle-header:hover {
+  opacity: 0.85;
+}
+
+.done-toggle-action {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-muted);
+}
+
+.done-toggle-hint {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.done-chevron-icon {
+  color: var(--text-muted);
+  transition: transform 200ms ease, color 200ms ease;
+}
+
+.done-chevron-icon.rotated {
+  transform: rotate(180deg);
+  color: var(--accent-primary);
+}
+
+/* Smooth height & fade collapsible container (200ms) */
+.collapsible-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 200ms ease, opacity 200ms ease, margin-top 200ms ease;
+  overflow: hidden;
+  margin-top: 0;
+}
+
+.collapsible-wrapper.open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  margin-top: var(--spacing-md);
+}
+
+.collapsible-inner {
+  min-height: 0;
+}
+
+/* Muted / Dimmed Done Tasks (opacity 65%) */
+.done-task-list .task-item {
+  opacity: 0.65;
+  transition: opacity var(--transition-fast), background var(--transition-fast);
+}
+
+.done-task-list .task-item:hover {
+  opacity: 0.9;
+}
+
 .task-list {
   display: flex;
   flex-direction: column;
@@ -730,6 +892,54 @@
 .delete-btn svg {
   width: 16px;
   height: 16px;
+}
+
+/* Mobile Floating Delete Button (Long-Press Trigger) */
+.mobile-floating-delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: var(--danger);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  z-index: 30;
+  animation: floatingBtnPop 200ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.mobile-floating-delete-btn:active {
+  transform: scale(0.92);
+}
+
+@keyframes floatingBtnPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive visibility for Task Actions */
+@media (max-width: 768px) {
+  .desktop-task-actions {
+    display: none !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-floating-delete-btn {
+    display: none !important;
+  }
 }
 
 /* ===== Progress Bar ===== */

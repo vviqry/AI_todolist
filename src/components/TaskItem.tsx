@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Trash2, ChevronDown, Pencil, Check, X, Repeat, CheckCircle2 } from "lucide-react";
 import type { Task } from "@/store/taskStore";
 import { useTaskStore } from "@/store/taskStore";
@@ -61,6 +61,99 @@ export default function TaskItem({
   const [subtasksOpen, setSubtasksOpen] = useState(false);
   const [instancesOpen, setInstancesOpen] = useState(true); // Default open for recurring
   const [removing, setRemoving] = useState(false);
+
+  // Mobile Long-Press Delete State
+  const [showFloatingDelete, setShowFloatingDelete] = useState(false);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoHideTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Clear timers on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+      if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current);
+    };
+  }, []);
+
+  // Dismiss floating delete on touch outside or scroll
+  useEffect(() => {
+    if (!showFloatingDelete) return;
+
+    const handleOutsideInteraction = (e: Event) => {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        setShowFloatingDelete(false);
+        if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current);
+      }
+    };
+
+    const handleScroll = () => {
+      setShowFloatingDelete(false);
+      if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current);
+    };
+
+    window.addEventListener("touchstart", handleOutsideInteraction, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleOutsideInteraction);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [showFloatingDelete]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const target = e.target as HTMLElement;
+    // Don't trigger long press if user touched a button, input, checkbox, or subtask item
+    if (
+      target.closest("button") ||
+      target.closest("input") ||
+      target.closest("textarea") ||
+      target.closest("label") ||
+      target.closest(".subtask-item") ||
+      target.closest(".edit-inline-btn")
+    ) {
+      return;
+    }
+
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+    }
+
+    longPressTimerRef.current = setTimeout(() => {
+      setShowFloatingDelete(true);
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate(40);
+      }
+
+      // Auto-hide after 2 seconds if not tapped
+      if (autoHideTimerRef.current) {
+        clearTimeout(autoHideTimerRef.current);
+      }
+      autoHideTimerRef.current = setTimeout(() => {
+        setShowFloatingDelete(false);
+      }, 2000);
+    }, 2000);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const handleTouchMove = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    if (showFloatingDelete) {
+      setShowFloatingDelete(false);
+      if (autoHideTimerRef.current) {
+        clearTimeout(autoHideTimerRef.current);
+      }
+    }
+  };
 
   // Task inline editing state
   const [isEditingTask, setIsEditingTask] = useState(false);
@@ -133,9 +226,31 @@ export default function TaskItem({
 
   return (
     <div
+      ref={cardRef}
       className={`task-item ${isCompleted ? "completed" : ""} ${hasSubtasks || isRecurring ? "has-subtasks" : ""} ${removing ? "removing" : ""} ${isRecurring ? "is-recurring-item" : ""}`}
       style={{ animation: removing ? "fadeOut 0.3s ease forwards" : undefined }}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
     >
+      {/* Mobile Floating Delete Button (Appears on 2s Long Press) */}
+      {showFloatingDelete && (
+        <button
+          type="button"
+          className="mobile-floating-delete-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowFloatingDelete(false);
+            if (autoHideTimerRef.current) clearTimeout(autoHideTimerRef.current);
+            handleDelete();
+          }}
+          title="Hapus tugas"
+          aria-label="Hapus tugas"
+        >
+          <Trash2 size={16} />
+        </button>
+      )}
+
       <div className="task-item-header">
         {/* Checkbox */}
         <div className="checkbox-wrapper">
@@ -232,7 +347,7 @@ export default function TaskItem({
           </div>
         </div>
 
-        <div className="task-actions">
+        <div className="task-actions desktop-task-actions">
           <button className="delete-btn" onClick={handleDelete} title="Hapus tugas">
             <Trash2 size={16} />
           </button>

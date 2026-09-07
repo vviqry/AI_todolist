@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Plus, X, Sparkles, Loader2, Repeat, Calendar, Hash } from "lucide-react";
 import { useTaskStore } from "@/store/taskStore";
 import { useAuthStore } from "@/store/authStore";
@@ -17,6 +17,7 @@ interface SubtaskInput {
 }
 
 export default function TaskForm() {
+  const [isOpen, setIsOpen] = useState(false);
   const [taskText, setTaskText] = useState("");
   const [priority, setPriority] = useState("low");
   const [subtasks, setSubtasks] = useState<SubtaskInput[]>([]);
@@ -28,8 +29,20 @@ export default function TaskForm() {
   const [submitting, setSubmitting] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const addTask = useTaskStore((s) => s.addTask);
   const user = useAuthStore((s) => s.user);
+
+  const handleToggleForm = () => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        setTimeout(() => textareaRef.current?.focus(), 200);
+      }
+      return next;
+    });
+  };
 
   const addSubtaskField = () => {
     setSubtasks([...subtasks, { id: Math.random().toString(36).substring(2, 9), text: "" }]);
@@ -130,6 +143,9 @@ export default function TaskForm() {
       setStartDate(getLocalDateString());
       setHasEndDate(false);
       setEndDate("");
+
+      // Automatically collapse the form after successful submit
+      setIsOpen(false);
     } catch (error) {
       console.error("Gagal menambah tugas:", error);
     } finally {
@@ -138,228 +154,249 @@ export default function TaskForm() {
   };
 
   return (
-    <section className="input-section">
-      <h2 className="section-title">
-        <span className="title-icon">➕</span>
-        Tambah Tugas Baru
-      </h2>
-      <form onSubmit={handleSubmit} className="task-form">
-        <div className="form-group" style={{ position: "relative" }}>
-          <textarea
-            className="task-input"
-            placeholder="Tuliskan tugas Anda di sini... (contoh: Bikin Konten)"
-            rows={3}
-            value={taskText}
-            onChange={(e) => setTaskText(e.target.value)}
-            required
-            style={{ paddingBottom: "32px" }}
-          ></textarea>
-
-          {/* AI Magic Button */}
+    <section className={`input-section ${isOpen ? "form-expanded" : "form-collapsed"}`}>
+      <div
+        className="input-section-header"
+        onClick={handleToggleForm}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleToggleForm();
+          }
+        }}
+      >
+        <div className="section-header-left">
           <button
             type="button"
-            className="ai-generate-btn"
-            onClick={handleGenerateAI}
-            disabled={generatingAI || !taskText.trim()}
-            title="Generate langkah dengan AI"
+            className={`form-toggle-btn ${isOpen ? "open" : ""}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleForm();
+            }}
+            title={isOpen ? "Tutup form" : "Tambah Tugas Baru"}
+            aria-label={isOpen ? "Tutup form tambah tugas" : "Buka form tambah tugas"}
           >
-            {generatingAI ? (
-              <Loader2 size={16} className="ai-spin" />
-            ) : (
-              <Sparkles size={16} />
-            )}
-            <span className="sr-only">Generate AI</span>
+            <Plus size={18} className={`form-toggle-icon ${isOpen ? "rotated" : ""}`} />
           </button>
+          <h2 className="section-title">Tambah Tugas Baru</h2>
         </div>
+        <span className="form-toggle-badge">
+          {isOpen ? "Tutup" : "Baru"}
+        </span>
+      </div>
 
-        {/* Recurring Section */}
-        <div className="form-group recurring-section-wrapper">
-          <label className="field-label">
-            <Repeat size={14} className="field-label-icon" />
-            Pengulangan
-          </label>
-          <div className="frequency-selector">
-            {(
-              [
-                { value: "none", label: "Tidak berulang" },
-                { value: "daily", label: "Setiap hari" },
-                { value: "weekly", label: "Setiap minggu" },
-                { value: "monthly", label: "Setiap bulan" },
-              ] as const
-            ).map((item) => (
+      <div className={`form-collapsible-wrapper ${isOpen ? "open" : "collapsed"}`}>
+        <div className="form-collapsible-inner">
+          <form onSubmit={handleSubmit} className="task-form">
+            <div className="form-group" style={{ position: "relative" }}>
+              <textarea
+                ref={textareaRef}
+                className="task-input"
+                placeholder="Tuliskan tugas Anda di sini... (contoh: Bikin Konten)"
+                rows={3}
+                value={taskText}
+                onChange={(e) => setTaskText(e.target.value)}
+                required
+                style={{ paddingBottom: "32px" }}
+              ></textarea>
+
+              {/* AI Magic Button */}
               <button
-                key={item.value}
                 type="button"
-                className={`frequency-pill-btn ${frequency === item.value ? "active" : ""}`}
-                onClick={() => handleFrequencyChange(item.value)}
+                className="ai-generate-btn"
+                onClick={handleGenerateAI}
+                disabled={generatingAI || !taskText.trim()}
+                title="Generate langkah dengan AI"
               >
-                {item.value !== "none" && <span className="freq-dot" />}
-                {item.label}
+                {generatingAI ? (
+                  <Loader2 size={16} className="ai-spin" />
+                ) : (
+                  <Sparkles size={16} />
+                )}
+                <span className="sr-only">Generate AI</span>
               </button>
-            ))}
-          </div>
+            </div>
 
-          {/* Recurring details expandable form */}
-          {frequency !== "none" && (
-            <div className="recurring-details-card">
-              <div className="recurring-form-row">
-                <div className="recurring-field">
-                  <label className="recurring-sublabel">
-                    <Hash size={13} />
-                    Target per {getTargetUnitLabel(frequency)}:
-                  </label>
-                  <div className="target-input-stepper">
-                    <button
-                      type="button"
-                      className="stepper-btn"
-                      onClick={() => setTargetCount((prev) => Math.max(1, prev - 1))}
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      min={1}
-                      step={1}
-                      className="target-number-input"
-                      value={targetCount}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value, 10);
-                        setTargetCount(isNaN(val) ? 1 : Math.max(1, val));
-                      }}
-                      required
-                    />
-                    <button
-                      type="button"
-                      className="stepper-btn"
-                      onClick={() => setTargetCount((prev) => prev + 1)}
-                    >
-                      +
-                    </button>
-                    <span className="target-unit-text">
-                      kali / {getTargetUnitLabel(frequency)}
-                    </span>
-                  </div>
-                </div>
+            {/* Recurring Section */}
+            <div className="form-group recurring-section-wrapper">
+              <label className="field-label">
+                <Repeat size={14} className="field-label-icon" />
+                Pengulangan
+              </label>
+              <div className="frequency-selector">
+                {(
+                  [
+                    { value: "none", label: "Tidak berulang" },
+                    { value: "daily", label: "Setiap hari" },
+                    { value: "weekly", label: "Setiap minggu" },
+                    { value: "monthly", label: "Setiap bulan" },
+                  ] as const
+                ).map((item) => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    className={`frequency-pill-btn ${frequency === item.value ? "active" : ""}`}
+                    onClick={() => handleFrequencyChange(item.value)}
+                  >
+                    {item.value !== "none" && <span className="freq-dot" />}
+                    {item.label}
+                  </button>
+                ))}
               </div>
 
-              <div className="recurring-date-grid">
-                <div className="recurring-field">
-                  <label className="recurring-sublabel">
-                    <Calendar size={13} />
-                    Mulai:
-                  </label>
-                  <input
-                    type="date"
-                    className="date-picker-input"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="recurring-field">
-                  <div className="end-date-header">
-                    <label className="recurring-sublabel">
-                      <Calendar size={13} />
-                      Berakhir:
+              {frequency !== "none" && (
+                <div className="recurring-details-box animate-fadeIn">
+                  {/* Target Count */}
+                  <div className="recurring-field-row">
+                    <label className="sub-label">
+                      <Hash size={13} />
+                      Target Selesai
                     </label>
-                    <label className="no-end-checkbox-label">
+                    <div className="target-counter-wrapper">
                       <input
-                        type="checkbox"
-                        checked={!hasEndDate}
-                        onChange={(e) => setHasEndDate(!e.target.checked)}
+                        type="number"
+                        min="1"
+                        max="999"
+                        value={targetCount}
+                        onChange={(e) => setTargetCount(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="target-number-input"
                       />
-                      <span>Tanpa batas</span>
-                    </label>
-                  </div>
-                  {hasEndDate ? (
-                    <input
-                      type="date"
-                      className="date-picker-input"
-                      value={endDate}
-                      min={startDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      required={hasEndDate}
-                    />
-                  ) : (
-                    <div className="date-picker-disabled">
-                      Selamanya (hingga dihapus)
+                      <span className="target-unit-text">
+                        kali / {getTargetUnitLabel(frequency)}
+                      </span>
                     </div>
-                  )}
+                  </div>
+
+                  {/* Dates Configuration */}
+                  <div className="recurring-dates-grid">
+                    <div className="date-field-col">
+                      <label className="sub-label">
+                        <Calendar size={13} />
+                        Tanggal Mulai
+                      </label>
+                      <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="date-input"
+                      />
+                    </div>
+
+                    <div className="date-field-col">
+                      <div className="end-date-toggle-row">
+                        <label className="sub-label">
+                          <Calendar size={13} />
+                          Batas Akhir
+                        </label>
+                        <input
+                          type="checkbox"
+                          id="hasEndDateToggle"
+                          checked={hasEndDate}
+                          onChange={(e) => setHasEndDate(e.target.checked)}
+                          className="subtask-checkbox"
+                        />
+                      </div>
+                      {hasEndDate ? (
+                        <input
+                          type="date"
+                          value={endDate}
+                          min={startDate}
+                          onChange={(e) => setEndDate(e.target.value)}
+                          className="date-input"
+                          required={hasEndDate}
+                        />
+                      ) : (
+                        <span className="no-end-date-badge">Berjalan terus (tanpa batas)</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
+              )}
+            </div>
+
+            {/* Sub-tasks Section */}
+            <div className="form-group subtask-builder">
+              <div className="subtask-header">
+                <label className="field-label">Langkah-langkah (Sub-tugas)</label>
+                <span className="subtask-counter">{subtasks.length} langkah</span>
+              </div>
+
+              {subtasks.length > 0 && (
+                <div className="subtask-inputs">
+                  {subtasks.map((st, index) => (
+                    <div key={st.id} className="subtask-input-row">
+                      <span className="subtask-input-number">{index + 1}</span>
+                      <input
+                        type="text"
+                        placeholder={`Langkah ${index + 1}...`}
+                        value={st.text}
+                        onChange={(e) => handleSubtaskChange(st.id, e.target.value)}
+                        className="subtask-text-input"
+                        autoFocus={index === subtasks.length - 1 && st.text === ""}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeSubtaskField(st.id)}
+                        className="remove-subtask-btn"
+                        title="Hapus langkah"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={addSubtaskField}
+                className="add-subtask-btn"
+              >
+                <Plus size={16} />
+                <span>Tambah Langkah Manual</span>
+              </button>
+            </div>
+
+            <div className="form-group">
+              <label className="field-label">Prioritas</label>
+              <div className="priority-selector">
+                {(["low", "medium", "high"] as const).map((p) => (
+                  <React.Fragment key={p}>
+                    <input
+                      type="radio"
+                      id={`priority-${p}`}
+                      name="priority"
+                      value={p}
+                      checked={priority === p}
+                      onChange={(e) => setPriority(e.target.value)}
+                    />
+                    <label
+                      htmlFor={`priority-${p}`}
+                      className={`priority-btn priority-${p}`}
+                    >
+                      <span className="priority-dot"></span>
+                      {p.charAt(0).toUpperCase() + p.slice(1)}
+                    </label>
+                  </React.Fragment>
+                ))}
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Sub-Task Builder (Available for any task) */}
-        <div className="form-group subtask-builder">
-          <label className="field-label">
-            <span>Sub Tugas (Opsional)</span>
-          </label>
-          <div className="subtask-inputs">
-            {subtasks.map((st, index) => (
-              <div key={st.id} className="subtask-input-row">
-                <span className="subtask-input-number">{index + 1}</span>
-                <input
-                  type="text"
-                  className="subtask-text-input"
-                  placeholder="Sub tugas..."
-                  value={st.text}
-                  onChange={(e) => handleSubtaskChange(st.id, e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="remove-subtask-btn"
-                  onClick={() => removeSubtaskField(st.id)}
-                >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
-          </div>
-          <button type="button" className="add-subtask-btn" onClick={addSubtaskField}>
-            <Plus size={16} />
-            Tambah Sub Tugas
-          </button>
+            <button type="submit" className="submit-btn" disabled={submitting}>
+              {submitting ? (
+                <span className="auth-spinner" style={{ width: 20, height: 20 }}></span>
+              ) : (
+                <>
+                  <Plus size={20} />
+                  Tambah Tugas
+                </>
+              )}
+            </button>
+          </form>
         </div>
-
-        <div className="form-group">
-          <label className="priority-label">Level Prioritas:</label>
-          <div className="priority-selector">
-            {["low", "medium", "high"].map((p) => (
-              <React.Fragment key={p}>
-                <input
-                  type="radio"
-                  id={`priority-${p}`}
-                  name="priority"
-                  value={p}
-                  checked={priority === p}
-                  onChange={(e) => setPriority(e.target.value)}
-                />
-                <label
-                  htmlFor={`priority-${p}`}
-                  className={`priority-btn priority-${p}`}
-                >
-                  <span className="priority-dot"></span>
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
-                </label>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-
-        <button type="submit" className="submit-btn" disabled={submitting}>
-          {submitting ? (
-            <span className="auth-spinner" style={{ width: 20, height: 20 }}></span>
-          ) : (
-            <>
-              <Plus size={20} />
-              Tambah Tugas
-            </>
-          )}
-        </button>
-      </form>
+      </div>
     </section>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { ClipboardList, CheckCircle } from "lucide-react";
+import React, { useState } from "react";
+import { ClipboardList, CheckCircle, ChevronDown } from "lucide-react";
 import TaskItem from "@/components/TaskItem";
 import type { Task } from "@/store/taskStore";
 import { useTaskStore } from "@/store/taskStore";
@@ -29,6 +29,7 @@ export default function TaskList({
   onUpdateRecurringConfig,
 }: TaskListProps) {
   const recurringInstances = useTaskStore((s) => s.recurringInstances);
+  const [isDoneOpen, setIsDoneOpen] = useState(false);
 
   // Helper to check if task is completed in its current state/period
   const isTaskCompleted = (task: Task): boolean => {
@@ -87,39 +88,59 @@ export default function TaskList({
         </div>
       </section>
 
-      {/* ===== Done Section ===== */}
+      {/* ===== Selesai Section (Collapsible) ===== */}
       <section className="done-section">
-        <div className="section-header">
+        <button
+          type="button"
+          className="section-header done-toggle-header"
+          onClick={() => setIsDoneOpen((prev) => !prev)}
+          aria-expanded={isDoneOpen}
+        >
           <h2 className="section-title">
             <span className="title-icon">✅</span>
-            Done
+            Selesai
             <span className="task-count done-count">{doneTasks.length}</span>
           </h2>
-        </div>
-        <div className="task-list">
-          {doneTasks.length === 0 ? (
-            <div className="empty-state">
-              <CheckCircle size={48} strokeWidth={1.5} className="mx-auto mb-4 opacity-50" />
-              <p>Belum ada tugas selesai</p>
-              <span>Selesaikan target tugas untuk memindahkannya ke sini</span>
+          <div className="done-toggle-action">
+            <span className="done-toggle-hint">
+              {isDoneOpen ? "Tutup" : "Lihat"}
+            </span>
+            <ChevronDown
+              size={18}
+              className={`done-chevron-icon ${isDoneOpen ? "rotated" : ""}`}
+            />
+          </div>
+        </button>
+
+        <div className={`collapsible-wrapper ${isDoneOpen ? "open" : "collapsed"}`}>
+          <div className="collapsible-inner">
+            <div className="task-list done-task-list">
+              {doneTasks.length === 0 ? (
+                <div className="empty-state">
+                  <CheckCircle size={44} strokeWidth={1.5} className="mx-auto mb-3 opacity-40" />
+                  <p>Belum ada tugas selesai</p>
+                  <span>Selesaikan target tugas untuk memindahkannya ke sini</span>
+                </div>
+              ) : (
+                doneTasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onToggleComplete={onToggleComplete}
+                    onToggleSubtask={onToggleSubtask}
+                    onToggleRecurringInstance={onToggleRecurringInstance}
+                    onDelete={onDelete}
+                    onEditTask={onEditTask}
+                    onEditSubtask={onEditSubtask}
+                    onUpdateRecurringConfig={onUpdateRecurringConfig}
+                  />
+                ))
+              )}
             </div>
-          ) : (
-            doneTasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                onToggleComplete={onToggleComplete}
-                onToggleSubtask={onToggleSubtask}
-                onToggleRecurringInstance={onToggleRecurringInstance}
-                onDelete={onDelete}
-                onEditTask={onEditTask}
-                onEditSubtask={onEditSubtask}
-                onUpdateRecurringConfig={onUpdateRecurringConfig}
-              />
-            ))
-          )}
+          </div>
         </div>
       </section>
     </>
   );
 }
+
