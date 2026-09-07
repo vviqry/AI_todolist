@@ -227,7 +227,7 @@ export default function TaskItem({
   return (
     <div
       ref={cardRef}
-      className={`task-item ${isCompleted ? "completed" : ""} ${hasSubtasks || isRecurring ? "has-subtasks" : ""} ${removing ? "removing" : ""} ${isRecurring ? "is-recurring-item" : ""}`}
+      className={`task-item ${isCompleted ? "completed" : ""} ${hasSubtasks || (isRecurring && targetCount > 1) ? "has-subtasks" : ""} ${removing ? "removing" : ""} ${isRecurring ? "is-recurring-item" : ""}`}
       style={{ animation: removing ? "fadeOut 0.3s ease forwards" : undefined }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -354,8 +354,8 @@ export default function TaskItem({
         </div>
       </div>
 
-      {/* ---- Recurring Instances Checklist ---- */}
-      {isRecurring && (
+      {/* ---- Recurring Instances Checklist (Hanya tampil jika target > 1) ---- */}
+      {isRecurring && targetCount > 1 && (
         <div className="recurring-instances-dropdown">
           <button
             type="button"
